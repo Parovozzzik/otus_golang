@@ -48,11 +48,16 @@ func prepareText(text string) string {
 
 func prepareResult(wordsSlice []wordsStruct) []string {
 	var result []string
+	var count int
 	if len(wordsSlice) > 10 {
-		for _, v := range wordsSlice[0:10] {
-			result = append(result, v.word)
-		}
+		count = 10
+	} else {
+	    count = len(wordsSlice)
 	}
+
+	for _, v := range wordsSlice[0:count] {
+        result = append(result, v.word)
+    }
 
 	return result
 }

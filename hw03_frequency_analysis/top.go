@@ -47,17 +47,17 @@ func prepareText(text string) string {
 }
 
 func prepareResult(wordsSlice []wordsStruct) []string {
-	var result []string
+	result := make([]string, 0, len(wordsSlice))
 	var count int
 	if len(wordsSlice) > 10 {
 		count = 10
 	} else {
-	    count = len(wordsSlice)
+		count = len(wordsSlice)
 	}
 
 	for _, v := range wordsSlice[0:count] {
-        result = append(result, v.word)
-    }
+		result = append(result, v.word)
+	}
 
 	return result
 }

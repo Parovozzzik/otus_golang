@@ -48,8 +48,7 @@ func prepareText(text string) string {
 
 func prepareResult(wordsSlice []wordsStruct) []string {
 	result := make([]string, 0, len(wordsSlice))
-	var count int
-	count = 10
+	count := 10
 	if len(wordsSlice) < 10 {
 		count = len(wordsSlice)
 	}

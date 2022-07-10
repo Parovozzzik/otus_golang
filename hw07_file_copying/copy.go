@@ -35,44 +35,34 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 
 	start := int64(0)
-	size := fileSize
 	if offset != 0 {
 		start = offset
-		size = fileSize - offset
 	}
 
-	barCount := 1
-	extraBarCount := 0
-	if limit != 0 {
-		barCount = int(size) / int(limit)
-		if size%limit > 0 {
-			extraBarCount = 1
-		}
-	} else {
-		limit = fileSize
+	if (limit+offset) > fileSize || limit == 0 {
+		limit = fileSize - offset
 	}
 
-	bar := pb.StartNew(barCount + extraBarCount)
-	defer bar.Finish()
-
-	data := make([]byte, size)
+	data := make([]byte, limit)
 	for start < fileSize {
-		bar.Increment()
-		dataCurrent := make([]byte, limit)
-		read, err := file.ReadAt(dataCurrent, start)
+		read, err := file.ReadAt(data, start)
 		start += int64(read)
 
-		if err == io.EOF || (start-limit) >= size {
-			copy(data[size-(size%limit):], dataCurrent[:(size%limit)])
+		if err == io.EOF || start >= limit {
 			break
-		} else {
-			copy(data[(start-limit-offset):(start-offset)], dataCurrent[:limit])
 		}
 	}
 
 	emptyFile, _ := os.Create(toPath)
 	defer emptyFile.Close()
-	emptyFile.Write(data)
+
+	bar := pb.StartNew(int(limit))
+	defer bar.Finish()
+
+	for i := 0; i < int(limit); i++ {
+		bar.Increment()
+		emptyFile.Write(data[i : i+1])
+	}
 
 	return nil
 }

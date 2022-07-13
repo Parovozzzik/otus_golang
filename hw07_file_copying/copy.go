@@ -5,8 +5,9 @@ import (
 	"flag"
 	"io"
 	"os"
+	"time"
 
-	"github.com/cheggaaa/pb/v3"
+	"github.com/cheggaaa/pb"
 )
 
 var (
@@ -64,7 +65,9 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 	defer emptyFile.Close()
 
-	bar := pb.StartNew(int(limit))
+	bar := pb.New(int(limit)).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
+    bar.ShowSpeed = true
+    bar.Start()
 	defer bar.Finish()
 
 	for i := 0; i < int(limit); i++ {

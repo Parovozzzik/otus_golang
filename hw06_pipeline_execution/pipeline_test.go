@@ -1,6 +1,7 @@
 package hw06pipelineexecution
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 	"time"
@@ -34,6 +35,7 @@ func TestPipeline(t *testing.T) {
 		g("Multiplier (* 2)", func(v interface{}) interface{} { return v.(int) * 2 }),
 		g("Adder (+ 100)", func(v interface{}) interface{} { return v.(int) + 100 }),
 		g("Stringifier", func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
+		g("StringAdder", func(v interface{}) interface{} { return fmt.Sprintf("%s%s", v, "qwe") }),
 	}
 
 	t.Run("simple case", func(t *testing.T) {
@@ -54,7 +56,7 @@ func TestPipeline(t *testing.T) {
 		}
 		elapsed := time.Since(start)
 
-		require.Equal(t, []string{"102", "104", "106", "108", "110"}, result)
+		require.Equal(t, []string{"102qwe", "104qwe", "106qwe", "108qwe", "110qwe"}, result)
 		require.Less(t,
 			int64(elapsed),
 			// ~0.8s for processing 5 values in 4 stages (100ms every) concurrently

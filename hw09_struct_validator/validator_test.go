@@ -2,8 +2,11 @@ package hw09structvalidator
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -17,6 +20,7 @@ type (
 		Email  string   `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
 		Role   UserRole `validate:"in:admin,stuff"`
 		Phones []string `validate:"len:11"`
+		Limits []int    `validate:"min:3|max:7"`
 		meta   json.RawMessage
 	}
 
@@ -37,15 +41,43 @@ type (
 )
 
 func TestValidate(t *testing.T) {
+	sec := `{"rawMessage"}`
+	byte1, _ := json.Marshal(sec)
+	rawMessage := json.RawMessage(byte1)
+	user := User{
+		"1",
+		"John",
+		12,
+		"parovozzzik@yandex.ru",
+		"admin",
+		[]string{"9312701311", "89214098329"},
+		[]int{3, 4, 55},
+		rawMessage,
+	}
+	userErrors := []ValidationError{
+		{"ID", ErrStrLen},
+		{"Age", ErrIntMin},
+		{"Phones", ErrStrLen},
+		{"Limits", ErrIntMax},
+	}
+
+	app := App{"1234"}
+	appErrors := []ValidationError{{"Version", ErrStrLen}}
+	app2 := App{"12345"}
+
+	response := Response{404, "NotFound"}
+	response2 := Response{504, "TimeOut"}
+	response2Errors := []ValidationError{{"Code", ErrIntIn}}
+
 	tests := []struct {
-		in          interface{}
-		expectedErr error
+		in               interface{}
+		validationErrors ValidationErrors
 	}{
-		{
-			// Place your code here.
-		},
-		// ...
-		// Place your code here.
+		{in: user, validationErrors: userErrors},
+		{in: app, validationErrors: appErrors},
+		{in: app2, validationErrors: nil},
+		{in: response, validationErrors: nil},
+		{in: response2, validationErrors: response2Errors},
 	}
 
 	for i, tt := range tests {
@@ -53,7 +85,15 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
+			errs := Validate(tt.in)
+			require.Equal(t, len(errs), len(tt.validationErrors))
+
+			for i := 0; i < len(tt.validationErrors); i++ {
+				require.True(t, errors.Is(tt.validationErrors[i].Err, errs[i].Err))
+			}
+
+			require.Equal(t, errs, tt.validationErrors)
+
 			_ = tt
 		})
 	}

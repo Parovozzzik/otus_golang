@@ -1,8 +1,6 @@
 package hw09structvalidator
 
-import (
-	"regexp"
-)
+import "regexp"
 
 type stringRegexpValidator struct{}
 

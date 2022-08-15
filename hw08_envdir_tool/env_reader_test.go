@@ -27,7 +27,8 @@ func TestEmptyDir(t *testing.T) {
 }
 
 func TestEqualSymbol(t *testing.T) {
-	file, _ := os.CreateTemp(envDir, "QWE_*")
+	file, err := os.CreateTemp(envDir, "QWE_*")
+	require.NoError(t, err)
 	file.Write([]byte("test"))
 	file.Close()
 	defer os.Remove(file.Name())

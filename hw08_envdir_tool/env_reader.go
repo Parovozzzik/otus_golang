@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -27,7 +27,7 @@ type EnvValue struct {
 // ReadDir reads a specified directory and returns map of env variables.
 // Variables represented as files where filename is name of variable, file first line is a value.
 func ReadDir(dir string) (Environment, error) {
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, ErrReadingDir
 	}
@@ -38,13 +38,14 @@ func ReadDir(dir string) (Environment, error) {
 		env.Value = ""
 		env.NeedRemove = false
 
-		fileName := dir + "/" + file.Name()
+		fileName := filepath.Join(dir, file.Name())
 
 		f, err := os.Open(fileName)
 		if err != nil {
 			fmt.Printf("error opening file: %v\n", err)
 			return nil, ErrOpeningFile
 		}
+		defer f.Close()
 
 		fileInfo, err := os.Stat(fileName)
 		if err != nil {
@@ -58,6 +59,9 @@ func ReadDir(dir string) (Environment, error) {
 
 		r := bufio.NewReader(f)
 		s, _ := Readln(r)
+		if err != nil {
+			return nil, ErrOpeningFile
+		}
 		if s == "" {
 			env.NeedRemove = true
 		}

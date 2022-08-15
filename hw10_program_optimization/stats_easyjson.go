@@ -4,16 +4,10 @@ import (
 	jlexer "github.com/mailru/easyjson/jlexer"
 )
 
-var (
-	_ *jlexer.Lexer
-)
+var _ *jlexer.Lexer
 
 func easyjsonE3ab7953DecodeGithubComFixmeMyFriendHw10ProgramOptimization(in *jlexer.Lexer, out *Email) {
-	isTopLevel := in.IsStart()
 	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
 		in.Skip()
 		return
 	}
@@ -28,16 +22,13 @@ func easyjsonE3ab7953DecodeGithubComFixmeMyFriendHw10ProgramOptimization(in *jle
 		}
 		switch key {
 		case "Email":
-            *out = Email(in.String())
+			*out = Email(in.String())
 		default:
 			in.SkipRecursive()
 		}
 		in.WantComma()
 	}
 	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
 }
 
 func (v *Email) UnmarshalEasyJSON(l *jlexer.Lexer) {

@@ -24,8 +24,8 @@ func GetDomainStat(r io.Reader, domain string) (emails DomainStat, err error) {
 	sc.Split(bufio.ScanLines)
 	for sc.Scan() {
 		email := emailPool.Get().(*Email)
-		if err = email.UnmarshalJSON(sc.Bytes()); err != nil {
-			return
+		if err = email.UnmarshalEasyJSON(sc.Bytes()); err != nil {
+			return nil, err
 		}
 
 		str := string(*email)

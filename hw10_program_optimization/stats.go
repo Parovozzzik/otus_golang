@@ -2,12 +2,9 @@ package hw10programoptimization
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"strings"
 	"sync"
-
-	"github.com/mailru/easyjson"
 )
 
 type Email string
@@ -27,8 +24,8 @@ func GetDomainStat(r io.Reader, domain string) (emails DomainStat, err error) {
 	sc.Split(bufio.ScanLines)
 	for sc.Scan() {
 		email := emailPool.Get().(*Email)
-		if err = easyjson.Unmarshal([]byte(sc.Text()), email); err != nil {
-			return nil, fmt.Errorf("get users error: %w", err)
+		if err = email.UnmarshalJSON(sc.Bytes()); err != nil {
+			return
 		}
 
 		str := string(*email)

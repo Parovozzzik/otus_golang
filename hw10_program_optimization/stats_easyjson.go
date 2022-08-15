@@ -31,6 +31,8 @@ func easyjsonE3ab7953DecodeGithubComFixmeMyFriendHw10ProgramOptimization(in *jle
 	in.Delim('}')
 }
 
-func (v *Email) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE3ab7953DecodeGithubComFixmeMyFriendHw10ProgramOptimization(l, v)
+func (v *Email) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonE3ab7953DecodeGithubComFixmeMyFriendHw10ProgramOptimization(&r, v)
+	return r.Error()
 }

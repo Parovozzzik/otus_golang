@@ -1,0 +1,8 @@
+name     old time/op    new time/op    delta
+Stats-8     585ms ± 0%     156ms ± 0%   ~     (p=1.000 n=1+1)
+
+name     old alloc/op   new alloc/op   delta
+Stats-8     322MB ± 0%       3MB ± 0%   ~     (p=1.000 n=1+1)
+
+name     old allocs/op  new allocs/op  delta
+Stats-8     3.15M ± 0%     0.12M ± 0%   ~     (p=1.000 n=1+1)

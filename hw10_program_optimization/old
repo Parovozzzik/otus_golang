@@ -1,0 +1,6 @@
+goos: darwin
+goarch: amd64
+cpu: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+BenchmarkStats-8   	       2	 584628828 ns/op	322219736 B/op	 3146570 allocs/op
+PASS
+ok  	command-line-arguments	1.988s

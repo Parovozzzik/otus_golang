@@ -39,41 +39,12 @@ func ReadDir(dir string) (Environment, error) {
 		env.NeedRemove = false
 
 		fileName := filepath.Join(dir, file.Name())
-
-		f, err := os.Open(fileName)
+		s, err := getValue(fileName, &env)
 		if err != nil {
-			fmt.Printf("error opening file: %v\n", err)
-			return nil, ErrOpeningFile
+			return nil, err
 		}
-		defer f.Close()
+		UnsetEnv(&s)
 
-		fileInfo, err := os.Stat(fileName)
-		if err != nil {
-			fmt.Println(err)
-			return nil, ErrUnsupportedFile
-		}
-		fileSize := fileInfo.Size()
-		if fileSize == 0 {
-			env.NeedRemove = true
-		}
-
-		r := bufio.NewReader(f)
-		s, _ := Readln(r)
-		if err != nil {
-			return nil, ErrOpeningFile
-		}
-		if s == "" {
-			env.NeedRemove = true
-		}
-
-		env.Value = s
-
-		for _, envVar := range os.Environ() {
-			pair := strings.SplitN(envVar, "=", 2)
-			if pair[0] == env.Value {
-				os.Unsetenv(pair[0])
-			}
-		}
 		environment[file.Name()] = env
 	}
 
@@ -90,4 +61,44 @@ func Readln(r *bufio.Reader) (string, error) {
 		line = []byte(strings.TrimRight(string(line), " "))
 	}
 	return string(line), err
+}
+
+func getValue(fileName string, env *EnvValue) (s string, err error) {
+	f, err := os.Open(fileName)
+	if err != nil {
+		fmt.Printf("error opening file: %v\n", err)
+		return "", ErrOpeningFile
+	}
+	defer f.Close()
+
+	fileInfo, err := os.Stat(fileName)
+	if err != nil {
+		fmt.Println(err)
+		return "", ErrUnsupportedFile
+	}
+
+	if fileInfo.Size() == 0 {
+		env.NeedRemove = true
+	}
+
+	r := bufio.NewReader(f)
+	s, _ = Readln(r)
+	if err != nil {
+		return "", ErrOpeningFile
+	}
+	if s == "" {
+		env.NeedRemove = true
+	}
+	env.Value = s
+
+	return
+}
+
+func UnsetEnv(value *string) {
+	for _, envVar := range os.Environ() {
+		pair := strings.SplitN(envVar, "=", 2)
+		if pair[0] == *value {
+			os.Unsetenv(pair[0])
+		}
+	}
 }

@@ -1,20 +1,17 @@
-package sqlstorage
+package mysql
 
-import "context"
+import (
+	"database/sql"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+)
 
-type Storage struct { // TODO
-}
+func NewClient(host string, port string, username string, password string, database string) (*sql.DB, error) {
+	dbUrl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, database)
+	db, err := sql.Open("mysql", dbUrl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create client to mongodb due to error %w", err)
+	}
 
-func New() *Storage {
-	return &Storage{}
-}
-
-func (s *Storage) Connect(ctx context.Context) error {
-	// TODO
-	return nil
-}
-
-func (s *Storage) Close(ctx context.Context) error {
-	// TODO
-	return nil
+	return db, nil
 }

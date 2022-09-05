@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  calendar-mysql:
+    container_name: calendar-mysql
+    restart: always
+    image: mysql:latest
+    volumes:
+      - './build/volumes/mysql/db:/var/lib/mysql'
+      - './build/volumes/mysql/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf'
+    ports:
+      - 33061:3306
+    env_file:
+      - 'volumes/mysql/.env'
+    networks:
+      - calendar-network
+
+  calendar-go:
+    container_name: calendar-go
+    restart: always
+    build:
+      context: ""
+    ports:
+      - 10002:10002
+    networks:
+      - calendar-network
+
+networks:
+  calendar-network:
+    driver: bridge

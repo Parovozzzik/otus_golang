@@ -2,39 +2,50 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"flag"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	app "github.com/Parovozzzik/otus_golang/hw12_13_14_15_calendar/internal/app"
+	config "github.com/Parovozzzik/otus_golang/hw12_13_14_15_calendar/internal/config"
+	logger "github.com/Parovozzzik/otus_golang/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/Parovozzzik/otus_golang/hw12_13_14_15_calendar/server/http"
+	client "github.com/Parovozzzik/otus_golang/hw12_13_14_15_calendar/storage/sql"
 )
 
 var configFile string
 
+var database *sql.DB
+
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config")
 }
 
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" {
-		printVersion()
-		return
+	logger.Init()
+	logger := logger.GetLogger()
+	logger.Info("logger initialized")
+
+	cnf := config.GetConfig()
+	//logg := logger.New(config.Logger.Level)
+
+	db, err := client.NewClient(cnf.MySql.Host, cnf.MySql.Port, cnf.MySql.Username, cnf.MySql.Password, cnf.MySql.Database)
+	if err != nil {
+		logger.Info(err)
 	}
 
-	config := NewConfig()
-	logg := logger.New(config.Logger.Level)
+	storage = db
+	logger.Info("database initialized")
+	defer database.Close()
 
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
+	calendar := app.New(logger, storage)
 
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(logger, calendar)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -47,14 +58,14 @@ func main() {
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
+			logger.Error("failed to stop http server: " + err.Error())
 		}
 	}()
 
-	logg.Info("calendar is running...")
+	logger.Info("calendar is running...")
 
 	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
+		logger.Error("failed to start http server: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}
